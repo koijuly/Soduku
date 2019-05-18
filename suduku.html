@@ -484,7 +484,7 @@ Requires Javascript to run.
         }
         for(i = 0; i < size; i++){
             for(var j = 0; j < size; j++){
-                givenAnswers[order[i]][j+1] = numbers[j];
+                givenAnswers[order[i]][order[j]] = numbers[j];
             }
             numbers.push(numbers[0]);
             numbers.splice(0, 1);
