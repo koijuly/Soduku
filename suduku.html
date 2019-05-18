@@ -1,0 +1,854 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+.row{
+    border: solid gray 1px;
+    float:left;
+}
+.cell{
+    float:left;
+    border: inherit;
+    text-align: center;
+    cursor:default;
+    user-select: none;
+}
+.innerCell{
+    float:left;
+    border: solid #eee 1px;
+    color: gray;
+    cursor:pointer;
+}
+#puzzle16{
+    width: 928px;
+    float:left;
+}
+#puzzle16 .row{
+    height: 56px;
+    width: 928px;
+}
+#puzzle16 .row1, #puzzle16 .row5, #puzzle16 .row9, #puzzle16 .row13{
+    border-top-color:black !important;
+}
+#puzzle16 .row4, #puzzle16 .row8, #puzzle16 .row12, #puzzle16 .row16{
+    border-bottom-color:black !important;
+}
+#puzzle16 .col1, #puzzle16 .col5, #puzzle16 .col9, #puzzle16 .col13{
+    border-left-color:black !important;
+}
+#puzzle16 .col4, #puzzle16 .col8, #puzzle16 .col12, #puzzle16 .col16{
+    border-right-color:black !important;
+}
+#puzzle16 .cell{
+    width: 56px;
+    height: 56px;
+    font-size: 44px;
+}
+#puzzle16 .innerCell{
+    width: 12px;
+    height: 12px;
+    font-size: 9px;
+}
+#puzzle9{
+    width: 747px;
+    float:left;
+}
+#puzzle9 .row{
+    height: 81px;
+    width: 747px;
+}
+#puzzle9 .row1, #puzzle9 .row4, #puzzle9 .row7{
+    border-top-color:black !important;
+}
+#puzzle9 .row3, #puzzle9 .row6, #puzzle9 .row9{
+    border-bottom-color:black !important;
+}
+#puzzle9 .col1, #puzzle9 .col4, #puzzle9 .col7{
+    border-left-color:black !important;
+}
+#puzzle9 .col3, #puzzle9 .col6, #puzzle9 .col9{
+    border-right-color:black !important;
+}
+#puzzle9 .cell{
+    width: 81px;
+    height: 81px;
+    font-size: 66px;
+}
+#puzzle9 .innerCell{
+    width: 25px;
+    height: 25px;
+    font-size: 21px;
+}
+#puzzle4{
+    width: 748px;
+    float:left;
+}
+#puzzle4 .row{
+    height: 185px;
+    width: 748px;
+}
+#puzzle4 .row1, #puzzle4 .row3{
+    border-top-color:black !important;
+}
+#puzzle4 .row2, #puzzle4 .row4{
+    border-bottom-color:black !important;
+}
+#puzzle4 .col1, #puzzle4 .col3{
+    border-left-color:black !important;
+}
+#puzzle4 .col2, #puzzle4 .col4{
+    border-right-color:black !important;
+}
+#puzzle4 .cell{
+    width: 185px;
+    height: 185px;
+    font-size: 150px;
+}
+#puzzle4 .innerCell{
+    margin-left:-0.5px;
+    margin-top:-0.5px;
+    width: 91px;
+    height: 91px;
+    font-size: 80px;
+}
+.innerCell.nonAnswer {
+    cursor:default;
+}
+.innerCell:hover{
+    background-color:#ccc;
+}
+.innerCell.nonAnswer:hover{
+    background-color:#fff
+}
+.answer {
+    height:inherit;
+    color: gray;
+    cursor:pointer;
+}
+.answer:hover{
+    background-color:#ccc;
+    color:#555;
+}
+.nonAnswer{
+    color:white !important;
+}
+.answer.wrong{
+    color: #ea9 !important;
+}
+.answer.wrong:hover{
+    color:#c87 !important;
+    background-color: #fcb !important;
+}
+.cell.wrong{
+    background-color: #fcb !important;
+}
+.button{
+    padding: 10px;
+    width:auto;
+    float:left;
+    font-size: 27px;
+    text-align: center;
+    cursor:pointer;
+    color:#246;
+    user-select: none;
+}
+.label{
+    padding: 10px;
+    width:auto;
+    float:left;
+    font-size: 27px;
+    text-align: center;
+    cursor:pointer;
+    color:#000;
+    user-select: none;
+    margin:0px;
+}
+.button:hover{
+    background-color: #ccf;
+}
+#buttons, #tests{
+    width:900px;
+    float:left;
+}
+#seed{
+    color:grey;
+    width:900px;
+    float:left;
+    padding:20px;
+    border: none;
+}
+</style>
+</head>
+<body>
+<div id="puzzle4" oncontextmenu="return false;">
+Requires Javascript to run.
+</div>
+<div id="puzzle9" oncontextmenu="return false;">
+</div>
+<div id="puzzle16" oncontextmenu="return false;">
+</div>
+<div id="tests">
+    <p id="test" class="label" onclick="test()">Tests:
+        <div class="button" id="answers" onclick="getGivenAnswers()">Answer Grid</div>
+        <div class="button" id="fullGrid" onclick="createFullGrid();makePenFromPencil()">Complete Grid</div>
+        <div class="button" id="holeGrid" onclick="createHoles();makePenFromPencil()">Make Holes in Grid</div>
+    </p>
+</div>
+<div id="buttons">
+    <div class="button" id="reset" onclick="resetGrid()">Reset Grid</div>
+    <div class="button" id="pencil" onclick="fillPencil()">Update Pencil Marks</div>
+    <div class="button" id="finalise" onclick="makePenFromPencil()">Mark Final</div>
+    <div class="button" id="new" onclick="createNewGrid()">New Grid</div>
+    <div class="button" id="empty" onclick="generateEmptyGrid()">Empty Grid</div>
+    <div class="button" id="import" onclick="importGrid()">Import Grid</div>
+    <p id="sizes" class="label" onclick="setUpGrid()">Puzzle Size:
+        <div class="button" onclick="gridSize(4)">Small</div>
+        <div class="button" onclick="gridSize(9)">Normal</div>
+        <div class="button" onclick="gridSize(16)">Large</div>
+    </p>
+</div>
+<p><textarea id="seed" type="text" value=""></textarea></p>
+<script>
+    var beginingNumbers = [];
+    var possibiies = [];
+    var givenAnswers = [];
+    var size = 4;
+    var seed = '';
+    //on cell click events
+    function penPressed(){
+        row = parseInt(this.id.substring(9, 10),17);
+        col = parseInt(this.id.substring(14, 15),17);
+        if(this.classList.contains('wrong')){
+            checkClashes(row,col,false);
+        }
+        givenAnswers[row][col] = 0;
+        findPossibilities (row, col);
+        makeCell(row, col);
+        this.classList.remove('answer');
+    }
+    function pencilPressed(){
+        let cell = this.parentElement;
+        let value = this.innerHTML
+        switch (event.which){
+        case 1:
+            //lets check if it is 'invisible'
+            if(this.classList.contains('nonAnswer')){
+                this.classList.remove('nonAnswer');
+            } else {
+                //it was an option, so make it the answer
+                cell.innerHTML = '<div id="answer' + cell.id + '" class="answer">' + value + '</div>';
+                row = parseInt(cell.id.substring(3, 4),17);
+                col = parseInt(cell.id.substring(8, 9),17);
+                givenAnswers[row][col] = value;
+                document.getElementById('answer' + cell.id).onmousedown = penPressed;
+                checkClashes(row,col,true);
+            }
+            break;
+        case 3:
+            //make it inisible
+            this.classList.add("nonAnswer");
+            break;
+        }
+    }
+
+    //cell maintenance
+    function makeCell(row, col){
+        var current = "row" + row.toString(17) + "_col" + col.toString(17);
+        var currentcell = document.getElementById(current);
+        var splitCell = "";
+        findPossibilities(row,col);
+        for( var i = 1; i <=size ; i++){
+            if(possibiies[row][col][i] != i){
+                splitCell += '<div id = "' + current + "_" + i + '" class="nonAnswer innerCell ' + current + ' ">' + i + '</div>';
+            } else {
+                splitCell += '<div id = "' + current + "_" + i + '" class="innerCell ' + current + '">' + i + '</div>';
+            }
+        }
+        currentcell.innerHTML = splitCell;
+        for( var i = 1; i <= size ; i++){
+            var temp = current + "_" + i
+            document.getElementById(temp).onmousedown = pencilPressed;
+        }
+    }
+    function markWrong(row,col){
+        var conflict = false;
+        //is this conflict cell a given answer or a begining number?
+        if(beginingNumbers[row][col-1] == 0){
+            //give answer
+            conflict = document.getElementById('answerrow' + row.toString(17)  + '_col' + col.toString(17) );
+        } else {
+            //begining number
+            conflict = document.getElementById('row' + row.toString(17)  + '_col' + col.toString(17) );
+        }
+        if(conflict){
+            conflict.classList.add('wrong');
+        } else {
+            console.log('subcell? mark: ' + row + ', ' + col);
+        }
+    }
+    function unmarkWrong(row,col){
+        var conflict = false;
+        var identity = 'row' + row.toString(17) + '_col' + col.toString(17);
+        //is this conflict cell a given answer or a begining number?
+        if(beginingNumbers[row][col-1] == 0){
+            //give answer
+            conflict = document.getElementById('answer' + identity);
+        } else {
+            //begining number
+            conflict = document.getElementById(identity);
+        }
+        if(conflict){
+            conflict.classList.remove('wrong');
+        } else {
+            console.log('subcell? unmark: ' + identity);
+        }
+    }
+    function markFinal(){
+        //prepare for render
+        let identity = '';
+        let conflict = '';
+        let errors = false;
+        for(row = 1; row <= size; row++){
+            for(col = 1; col <=size; col++){
+                identity = 'answer' + 'row' + row.toString(17) + '_col' + col.toString(17);
+                conflict = document.getElementById(identity);
+                if(conflict && conflict.classList.contains('wrong') == false){
+                    beginingNumbers[row][col-1] = givenAnswers[row][col];
+                } else {
+                    if(conflict && conflict.classList.contains('wrong') == true){
+                        errors = true;
+                    }
+                }
+            }
+        }
+        if(errors){
+            alert('Some entries had clashes. They will be erased');
+        }
+        //finally render the answer
+        resetGrid();
+    }
+
+    //Grid set-up
+    function buildGrid(){
+        document.getElementById('puzzle4').innerHTML = '';
+        document.getElementById('puzzle9').innerHTML = '';
+        document.getElementById('puzzle16').innerHTML = '';
+        var puzzle = document.getElementById('puzzle' + size);
+        var html = '';
+        for(var row = 1; row <= size; row++){
+            html += '<div class="row ' + ' row' + row + '">';
+            for(var col = 1; col <= size; col++){
+                html+= '<div class ="cell' + ' col' + col + '" id="row' + row.toString(17) + '_col' + col.toString(17) + '"></div>';
+            }
+            html += '</div>';
+        }
+        puzzle.innerHTML = html;
+    }
+    function demoGridNumber(){
+        if(size==16){
+            beginingNumbers[1]=[0xe,0xc,0,0xd,6,0xb,3,0,4,0,9,0x10,0,0,2,0];
+            beginingNumbers[2]=[9,0xa,0,0,0,0,0xc,0,8,0,0,0xb,0xd,0,1,0];
+            beginingNumbers[3]=[3,0x10,8,0,0xd,0,0,0,0,0xc,2,0xf,0,9,0xb,0];
+            beginingNumbers[4]=[0,6,2,0,0,0,0,0,0,0,0xd,0xe,0xc,0x10,0,8];
+            beginingNumbers[5]=[0xc,0,0,0xe,8,6,0,0x10,0,4,0xf,0,0xa,0,0xd,0xb];
+            beginingNumbers[6]=[0xa,0,3,7,2,0,1,0xe,0,6,0xb,0,8,0,0xf,0x10];
+            beginingNumbers[7]=[5,4,0,0,7,0,9,0,3,0,0,0,0,6,0,1];
+            beginingNumbers[8]=[0,2,0,0x10,0,0,0,0xa,0,8,0xe,0,5,0,4,9];
+            beginingNumbers[9]=[0,0,4,5,0x10,0,0xd,0,2,0,0,0,0,0,0,0];
+            beginingNumbers[10]=[1,3,0xc,2,0,8,4,0,0x10,0xe,0,0,0,0,0xa,0xd];
+            beginingNumbers[11]=[0,0,0,6,0,0xa,2,7,0,0xd,0,0,0,0xb,0x10,0];
+            beginingNumbers[12]=[0xd,8,0,0,5,9,0,0,0xb,0,1,4,3,0,6,7];
+            beginingNumbers[13]=[8,7,0,0,0,0xe,0xf,0,0xc,0,0,0,0x10,1,0,2];
+            beginingNumbers[14]=[0,0,1,9,4,2,0,0,0,3,0,0,0xb,0xd,7,0];
+            beginingNumbers[15]=[2,0,0,0,0xb,0xc,0,1,0,0,0,7,0,0,0,0xa];
+            beginingNumbers[16]=[0,0,6,0xc,0xa,0,0x10,0xd,1,0,0,9,0,0xe,0,3];
+        } else if(size==9){
+            beginingNumbers[1]=[0,0,6,4,9,0,3,5,2];
+            beginingNumbers[2]=[0,9,0,0,5,0,1,0,6];
+            beginingNumbers[3]=[5,3,0,0,8,1,0,0,7];
+            beginingNumbers[4]=[0,0,0,0,0,3,0,0,0];
+            beginingNumbers[5]=[8,0,0,0,2,0,0,0,3];
+            beginingNumbers[6]=[0,0,0,7,0,0,0,0,0];
+            beginingNumbers[7]=[6,0,0,5,7,0,0,4,1];
+            beginingNumbers[8]=[9,0,8,0,3,0,0,7,0];
+            beginingNumbers[9]=[4,5,7,0,6,8,2,0,0];
+        } else if(size==4){
+            beginingNumbers[1]=[1,0,3,0];
+            beginingNumbers[2]=[0,0,0,2];
+            beginingNumbers[3]=[0,3,0,0];
+            beginingNumbers[4]=[2,0,0,0];
+        }
+        document.getElementById('seed').innerHTML = '';
+    }
+    function setUpGrid(){
+        initialisePossibilies();
+        demoGridNumber();
+        fillGridPen();
+        fillPencil();
+    }
+    function resetGrid(){
+        fillGridPen();
+        fillPencil();
+    }
+    function generateEmptyGrid(){
+        initialisePossibilies();
+        for(var i = 1; i<=size;i++){
+            for(var j = 0; j <size; j++){
+                beginingNumbers[i][j] = 0;
+            }
+        }
+        fillGridPen();
+        fillPencil();
+    }
+    function createNewGrid(){
+        createFullGrid()
+        createHoles();
+        //Render
+        makePenFromPencil();
+    }
+    function importGrid(){
+        test = document.getElementById('seed').innerHTML;
+        test = test.split('h');
+        if(isNaN(parseInt(test[0],17))){
+            alert('Can\'t build without a seed');
+        } else {
+            size = parseInt(test[0],17);
+            generateEmptyGrid();
+            for(var i = 0; i < size; i++){
+                givenAnswers[1][i+1] = test[1].substring(i,i+1);
+            }
+            for (var row = 2; row < size; row++){
+                var line = test[row];
+                var colsNotFilled = [];
+                var lineIndex = 0;
+                for(var i = 1; i <=size; i++){
+                    if(givenAnswers[row][i]==0){
+                        colsNotFilled.push(i);
+                    }
+                }
+                while(colsNotFilled[0]!=undefined){
+                    var index = 0;
+                    var temp = [];
+                    //ensure last possible positions are respected
+                    fillRow(row,colsNotFilled);
+                    //now pick one with few options left and set a random value
+                    if(colsNotFilled[0] != undefined){
+                        col = leastOptions(row);
+                        number = line.substring(lineIndex,lineIndex +1);
+                        lineIndex++;
+                        givenAnswers[row][col] = number;
+                        colsNotFilled.splice(colsNotFilled.indexOf(col),1);
+                    }
+                }
+            }
+            createHoles(test[size]);
+            //render grid
+            makePenFromPencil();
+        }
+    }
+    function createFullGrid(){
+        if(size==4){
+            createSmallFullGrid();
+        } else {
+            createNotSmallFullGrid();
+        }
+    }
+    function createNotSmallFullGrid(){
+        //initalise
+        initialisePossibilies();
+        let numbers=[];
+        let tempNumbers=[];
+        //Get a boring 1,2,3 ordered grid
+        let tempSquare = defaultGrid();
+
+        //Get the possible numbers
+        for(i=0;i<size;i++){
+            tempNumbers[i] = i + 1;
+        }
+        //Randomise the order
+        for(i=0;i<size;i++){
+            let temp = Math.floor((Math.random() * tempNumbers.length));
+            numbers[i] = tempNumbers[temp];
+            tempNumbers.splice(temp, 1);
+        }
+        //assign the 'random' numbers to the boring full grid
+        for(i=0;i<size;i++){
+            for(j=0;j<size;j++){
+                //get the number for this square by using the boring 123 grid and the randomised numbers
+                let temp = tempSquare[numbers[i]][numbers[j]];
+                givenAnswers[i+1][j] = temp;
+            }
+        }
+    }
+    function createSmallFullGrid(){
+        initialisePossibilies();
+        let temp = [];
+        for(let i =0; i<size;i++){
+            temp[i] = i+1;
+        }
+        let index = -1;
+        let number = size+1;
+        seed = size + 'h';
+        let colsNotFilled = [];
+        //first row is easy
+        for ( i = 1; i < size; i++){
+            index = Math.floor((Math.random() * temp.length))
+            number = temp[index];
+            temp.splice(index, 1);
+            givenAnswers[1][i] = number;
+            seed += number.toString(16);
+        }
+        //now it gets complicated
+        for (let row = 2; row <= size; row++){
+            seed += 'h';
+            colsNotFilled = [];
+            for(i = 1; i <=size; i++){
+                if(givenAnswers[row][i]==0){
+                    colsNotFilled.push(i);
+                }
+            }
+            while(colsNotFilled[0]!=undefined){
+                index = 0;
+                temp = [];
+                //ensure last possible positions are respected
+                fillRow(row,colsNotFilled);
+                //now pick one with few options left and set a random value
+                if(colsNotFilled[0] != undefined){
+                    let col = leastOptions(row,colsNotFilled);
+                    for(var i = 0;i<=size;i++){
+                        if(possibiies[row][col][i] != 0){
+                            temp.push(possibiies[row][col][i]);
+                        }
+                    }
+                    if(temp[0] != undefined){
+                        number = temp[Math.floor((Math.random() * temp.length))];
+                        givenAnswers[row][col] = number;
+                        colsNotFilled.splice(colsNotFilled.indexOf(col),1);
+                        seed += number.toString(16);
+                    }
+                }
+            }
+        }
+        document.getElementById('seed').innerHTML = seed;
+    }
+    function defaultGrid(){
+    var defaultGrid = [];
+        if(size==16){
+            defaultGrid[1]=[1,2,3,4,5,6,7,8,9,0xa,0xb,0xc,0xd,0xe,0xf,0x10];
+            defaultGrid[2]=[2,3,4,5,6,7,8,9,0xa,0xb,0xc,0xd,0xe,0xf,0x10,1];
+            defaultGrid[3]=[3,4,5,6,7,8,9,0xa,0xb,0xc,0xd,0xe,0xf,0x10,1,2];
+            defaultGrid[4]=[4,5,6,7,8,9,0xa,0xb,0xc,0xd,0xe,0xf,0x10,1,2,3];
+            defaultGrid[5]=[5,6,7,8,9,0xa,0xb,0xc,0xd,0xe,0xf,0x10,1,2,3,4];
+            defaultGrid[6]=[6,7,8,9,0xa,0xb,0xc,0xd,0xe,0xf,0x10,1,2,3,4,5];
+            defaultGrid[7]=[7,8,9,0xa,0xb,0xc,0xd,0xe,0xf,0x10,1,2,3,4,5,6];
+            defaultGrid[8]=[8,9,0xa,0xb,0xc,0xd,0xe,0xf,0x10,1,2,3,4,5,6,7];
+            defaultGrid[9]=[9,0xa,0xb,0xc,0xd,0xe,0xf,0x10,1,2,3,4,5,6,7,8];
+            defaultGrid[10]=[0xa,0xb,0xc,0xd,0xe,0xf,0x10,1,2,3,4,5,6,7,8,9];
+            defaultGrid[11]=[0xb,0xc,0xd,0xe,0xf,0x10,1,2,3,4,5,6,7,8,9,0xa];
+            defaultGrid[12]=[0xc,0xd,0xe,0xf,0x10,1,2,3,4,5,6,7,8,9,0xa,0xb];
+            defaultGrid[13]=[0xd,0xe,0xf,0x10,1,2,3,4,5,6,7,8,9,0xa,0xb,0xc];
+            defaultGrid[14]=[0xe,0xf,0x10,1,2,3,4,5,6,7,8,9,0xa,0xb,0xc,0xd];
+            defaultGrid[15]=[0xf,0x10,1,2,3,4,5,6,7,8,9,0xa,0xb,0xc,0xd,0xe];
+            defaultGrid[16]=[0x10,1,2,3,4,5,6,7,8,9,0xa,0xb,0xc,0xd,0xe,0xf];
+        } else if(size==9){
+            defaultGrid[1]=[1,2,3,4,5,6,7,8,9];
+            defaultGrid[2]=[2,3,4,5,6,7,8,9,1];
+            defaultGrid[3]=[3,4,5,6,7,8,9,1,2];
+            defaultGrid[4]=[4,5,6,7,8,9,1,2,3];
+            defaultGrid[5]=[5,6,7,8,9,1,2,3,4];
+            defaultGrid[6]=[6,7,8,9,1,2,3,4,5];
+            defaultGrid[7]=[7,8,9,1,2,3,4,5,6];
+            defaultGrid[8]=[8,9,1,2,3,4,5,6,7];
+            defaultGrid[9]=[9,1,2,3,4,5,6,7,8];
+        } else if(size==4){
+            defaultGrid[1]=[1,2,3,4];
+            defaultGrid[2]=[2,3,4,1];
+            defaultGrid[3]=[3,4,1,2];
+            defaultGrid[4]=[4,1,2,3];
+        }
+        return defaultGrid;
+    }
+
+    //grid maintenance
+    function initialisePossibilies(){
+        buildGrid();
+        var col = 1;
+        var row = 1;
+        possibiies = [];
+        givenAnswers =[];
+        for(var i =  1; i <= size ; i++){
+            possibiies[i] = [];
+            givenAnswers[i] = [];
+            for (var j = 1; j <= size ; j++){
+                possibiies[i][j] = [];
+                givenAnswers[i][j] = 0;
+            }
+        }
+    }
+    function fillGridPen(){
+        var current = "";
+        var currentcell;
+        for (var row = 1; row <= size; row++){
+            for (var col = 1; col <= size; col++) {
+                current = "row" + row.toString(17) + "_col" + col.toString(17);
+                currentcell = document.getElementById(current);
+                currentcell.classList.remove('wrong');
+                var test = beginingNumbers[row][col-1];
+                if (test > 0){
+                    currentcell.innerHTML = beginingNumbers[row][col-1];
+                    givenAnswers[row][col] = beginingNumbers[row][col-1];
+                } else {
+                    givenAnswers[row][col] = 0;
+                }
+            }
+        }
+    }
+    function fillPencil(){
+        for (var row = 1; row <= size; row++){
+            for (var col = 1; col <= size; col++) {
+                var test = givenAnswers[row][col];
+                if (test == 0) {
+                    makeCell(row, col);
+                }
+            }
+        }
+    }
+    function gridSize(newSize){
+        size = newSize;
+        setUpGrid();
+    }
+    function createHoles(fromSeed = ''){
+        let col = 0;
+        let row = 0;
+        let times = 0;
+        if(fromSeed){
+            for(times = 0; times < fromSeed.length ; times++){
+                row = parseInt(fromSeed.substring(times,times+1),17);
+                times++;
+                col = parseInt(fromSeed.substring(times,times+1),17);
+                givenAnswers[row][col] = 0;
+            }
+        } else {
+            seed = document.getElementById('seed').innerHTML;
+            for(row = 1; row <=size;row++){
+                for(times = 0; times <= (size/2); times++){
+                    col = Math.ceil((Math.random() * size));
+                    temp = givenAnswers[row][col];
+                    givenAnswers[row][col] = 0;
+                    if(numberPosibities(row,col) != 1){
+                        givenAnswers[row][col] = temp;
+                    } else if(temp != 0) {
+                        seed += row.toString(17) + col.toString(17);
+                    }
+                }
+            }
+        }
+        document.getElementById('seed').innerHTML = seed;
+    }
+    function makePenFromPencil(){
+        //prepare for render
+        for(row = 1; row <= size; row++){
+            for(col = 1; col <=size; col++){
+                beginingNumbers[row][col-1] = givenAnswers[row][col];
+            }
+        }
+        //finally render the answer
+        resetGrid();
+    }
+
+    //validation checks
+    function findPossibilities (row, col){
+        let test = 0;
+        let temp = [];
+        for(let i = 1;i<=size;i++){
+            temp[i] = i;
+        }
+        for(let i =  1; i <= size ; i++){
+            test = givenAnswers[row][i];
+            temp[test] = 0;
+            test = givenAnswers[i][col];
+            temp[test] = 0;
+        }
+        let rowStart = Math.floor((row-1)/Math.sqrt(size))*Math.sqrt(size)+1;
+        let colStart = Math.floor((col-1)/Math.sqrt(size))*Math.sqrt(size)+1;
+        let rowEnd = rowStart + Math.sqrt(size) -1;
+        let colEnd = colStart + Math.sqrt(size) -1;
+        for(let blockRow = rowStart; blockRow <= rowEnd; blockRow++){
+            for(blockCol = colStart; blockCol <= colEnd; blockCol++){
+                test = givenAnswers[blockRow][blockCol];
+                temp[test] = 0;
+            }
+        }
+        possibiies[row][col] = temp;
+    }
+    function checkValid(row,col){
+        let number = givenAnswers[row][col];
+        if(number == 0){
+            return false;
+        }
+        givenAnswers[row][col] = 0;
+        findPossibilities(row, col);
+        let test = (possibiies[row][col][number] == number);
+        givenAnswers[row][col] = number;
+        return test;
+    }
+    function checkClashes(row,col,answerAdded){
+        let number = givenAnswers[row][col];
+        givenAnswers[row][col] = 0;
+        let rowStart = Math.floor((row-1)/Math.sqrt(size))*Math.sqrt(size)+1;
+        let colStart = Math.floor((col-1)/Math.sqrt(size))*Math.sqrt(size)+1;
+        let rowEnd = rowStart + Math.sqrt(size) -1;
+        let colEnd = colStart + Math.sqrt(size) -1;
+        if(answerAdded){
+            //Need to check it is valid and higlight any clashes
+            findPossibilities(row, col);
+            if(possibiies[row][col][number] != number){
+                //mark things wrong.
+                markWrong(row,col);
+                //row and column checks
+                for(let check = 1;check<=size;check++){
+                    if(givenAnswers[row][check]==number){
+                         markWrong(row,check);
+                    }
+                    if(givenAnswers[check][col]==number){
+                         markWrong(check,col);
+                    }
+                }
+                //block check
+                for(let blockRow = rowStart; blockRow <= rowEnd; blockRow++){
+                    for(blockCol = colStart; blockCol <= colEnd; blockCol++){
+                        if(givenAnswers[blockRow][blockCol] == number){
+                            markWrong(blockRow,blockCol);
+                        }
+                    }
+                }
+            }
+            givenAnswers[row][col] = number;
+        }
+        else {
+            //Need to remove unneeded 'wrong' tags
+            unmarkWrong(row,col);
+            for(let check = 1;check<=size;check++){
+                if(checkValid(row,check)){
+                     unmarkWrong(row,check);
+                }
+                if(checkValid(check,col)){
+                     unmarkWrong(check,col);
+                }
+            }
+            //block check
+            for(let blockRow = rowStart; blockRow <= rowEnd; blockRow++){
+                for(let blockCol = colStart; blockCol <= colEnd; blockCol++){
+                    if(checkValid(blockRow,blockCol)){
+                        unmarkWrong(blockRow,blockCol);
+                    }
+                }
+            }
+        }
+    }
+
+    //Solvers -- used to create/import grids
+    function fillColmuns (row, colsToFill){
+        var foundOne = false;
+        for(var number = 1; number <= size; number++){
+            var col = [];
+            for(var testCol = 0; testCol < colsToFill.length; testCol++){
+                findPossibilities (row, colsToFill[testCol]);
+                if(possibiies[row][colsToFill[testCol]][number] == number){
+                    col.push(colsToFill[testCol]);
+                }
+            }
+            if(col[0] != undefined && col.length == 1){
+                givenAnswers[row][col[0]] = number;
+                colsToFill.splice(colsToFill.indexOf(col[0]),1);
+                foundOne = true;
+            }
+        }
+        return foundOne;
+    }
+    function fillBlock(row, col, colsToFill){
+        var foundOne = false;
+        rowStart = Math.floor((row-1)/Math.sqrt(size))*Math.sqrt(size)+1;
+        colStart = Math.floor((col-1)/Math.sqrt(size))*Math.sqrt(size)+1;
+        rowEnd = rowStart + Math.sqrt(size) -1;
+        colEnd = colStart + Math.sqrt(size) -1;
+        var count = 0;
+        for(var blockRow = rowStart; blockRow <= rowEnd; blockRow++){
+            for(var blockCol = colStart; blockCol <= colEnd; blockCol++){
+                if(givenAnswers[blockRow][blockCol] == 0){
+                    findPossibilities(blockRow,blockCol);
+                    count = 0;
+                    var temp = 0;
+                    for(var number = 1;number<=size;number++){
+                        if(possibiies[blockRow][blockCol][number]==number){
+                            temp = number;
+                            count++;
+                        }
+                    }
+                    if(count==1){
+                        if(row == blockRow){
+                            colsToFill.splice(colsToFill.indexOf(temp),1);
+                        }
+                        givenAnswers[blockRow][blockCol] = temp;
+                        foundOne = true;
+                    }
+                }
+            }
+        }
+        return foundOne;
+    }
+    function fillRow(row,colsToFill){
+        var foundOne = fillColmuns(row,colsToFill);
+        for(var test = 1; test < size; test += Math.sqrt(size)){
+            foundOne = foundOne || fillBlock(row,test,colsToFill);
+        }
+        if(foundOne){
+            fillRow(row,colsToFill);
+        }
+    }
+    function numberPosibities(row,col){
+        findPossibilities(row,col);
+        let count = 0;
+        for(var i = 1;i<=size;i++){
+            if(possibiies[row][col][i] != 0){
+                count++;
+            }
+        }
+        return count;
+    }
+    function leastOptions(row){
+        var temp = [];
+        var index = 0;
+        var number = size;
+        for ( var col = 1; col <= size; col++){
+            findPossibilities(row,col);
+            temp[col] = [];
+            if(givenAnswers[row][col] == 0){
+                for(var i = 0;i<=size;i++){
+                    if(possibiies[row][col][i] != 0){
+                        temp[col].push(possibiies[row][col][i]);
+                    }
+                }
+                if(temp[col].length < number){
+                    index = col;
+                    number = temp[col].length;
+                }
+            }
+        }
+        return index;
+    }
+
+    //page load
+    setUpGrid();
+
+    //testing functions
+    function test(){
+        console.log(givenAnswers);
+        createHoles();
+    }
+    function getGivenAnswers(){
+        console.log(givenAnswers);
+    }
+</script>
+</body>
+</html>
