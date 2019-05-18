@@ -214,6 +214,7 @@ Requires Javascript to run.
     var givenAnswers = [];
     var size = 4;
     var seed = '';
+    var testing = false;
     //on cell click events
     function penPressed(){
         row = parseInt(this.id.substring(9, 10),17);
@@ -400,7 +401,6 @@ Requires Javascript to run.
         fillGridPen();
         fillPencil();
     }
-    function createNewGrid(){
         createFullGrid()
         createHoles();
         //Render
@@ -844,6 +844,7 @@ Requires Javascript to run.
     //testing functions
     function test(){
         console.log(givenAnswers);
+        testing = !testing;
         createHoles();
     }
     function getGivenAnswers(){
