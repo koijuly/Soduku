@@ -198,9 +198,14 @@ Requires Javascript to run.
     <div class="button" id="reset" onclick="resetGrid()">Reset Grid</div>
     <div class="button" id="pencil" onclick="fillPencil()">Update Pencil Marks</div>
     <div class="button" id="finalise" onclick="makePenFromPencil()">Mark Final</div>
-    <div class="button" id="new" onclick="createNewGrid()">New Grid</div>
     <div class="button" id="empty" onclick="generateEmptyGrid()">Empty Grid</div>
     <div class="button" id="import" onclick="importGrid()">Import Grid</div>
+    <p class="label" id="new" onclick="createNewGrid(0)">New Grid:
+        <div class="button" onclick="createNewGrid(1)">1</div>
+        <div class="button" onclick="createNewGrid(2)">2</div>
+        <div class="button" onclick="createNewGrid(3)">3</div>
+        <div class="button" onclick="createNewGrid(4)">4</div>
+    </p>
     <p id="sizes" class="label" onclick="setUpGrid()">Puzzle Size:
         <div class="button" onclick="gridSize(4)">Small</div>
         <div class="button" onclick="gridSize(9)">Normal</div>
@@ -214,6 +219,7 @@ Requires Javascript to run.
     var givenAnswers = [];
     var size = 4;
     var seed = '';
+    var testing = false;
     //on cell click events
     function penPressed(){
         row = parseInt(this.id.substring(9, 10),17);
@@ -400,9 +406,21 @@ Requires Javascript to run.
         fillGridPen();
         fillPencil();
     }
-    function createNewGrid(){
-        createFullGrid()
-        createHoles();
+    function createNewGrid(tries){
+        createFullGrid();
+        if(size == 4){
+            for(var i = 0; i < tries; i++){
+                createHoles();
+            }
+        } else if(size == 9){
+            for(var i = 0; i < tries*2; i++){
+                createHoles();
+            }
+        } else if(size == 16){
+            for(var i = 0; i < tries*3; i++){
+                createHoles();
+            }
+        }
         //Render
         makePenFromPencil();
     }
@@ -447,19 +465,11 @@ Requires Javascript to run.
         }
     }
     function createFullGrid(){
-        if(size==4){
-            createSmallFullGrid();
-        } else {
-            createNotSmallFullGrid();
-        }
-    }
-    function createNotSmallFullGrid(){
         //initalise
         initialisePossibilies();
-        let numbers=[];
-        let tempNumbers=[];
-        //Get a boring 1,2,3 ordered grid
-        let tempSquare = defaultGrid();
+        let numbers = [];
+        let order = [];
+        let tempNumbers = [];
 
         //Get the possible numbers
         for(i=0;i<size;i++){
@@ -469,104 +479,17 @@ Requires Javascript to run.
         for(i=0;i<size;i++){
             let temp = Math.floor((Math.random() * tempNumbers.length));
             numbers[i] = tempNumbers[temp];
+            order[i] = tempNumbers[temp];
             tempNumbers.splice(temp, 1);
         }
-        //assign the 'random' numbers to the boring full grid
-        for(i=0;i<size;i++){
-            for(j=0;j<size;j++){
-                //get the number for this square by using the boring 123 grid and the randomised numbers
-                let temp = tempSquare[numbers[i]][numbers[j]];
-                givenAnswers[i+1][j] = temp;
+        for(i = 0; i < size; i++){
+            for(var j = 0; j < size; j++){
+                givenAnswers[order[i]][order[j]] = numbers[j];
             }
-        }
-    }
-    function createSmallFullGrid(){
-        initialisePossibilies();
-        let temp = [];
-        for(let i =0; i<size;i++){
-            temp[i] = i+1;
-        }
-        let index = -1;
-        let number = size+1;
-        seed = size + 'h';
-        let colsNotFilled = [];
-        //first row is easy
-        for ( i = 1; i < size; i++){
-            index = Math.floor((Math.random() * temp.length))
-            number = temp[index];
-            temp.splice(index, 1);
-            givenAnswers[1][i] = number;
-            seed += number.toString(16);
-        }
-        //now it gets complicated
-        for (let row = 2; row <= size; row++){
-            seed += 'h';
-            colsNotFilled = [];
-            for(i = 1; i <=size; i++){
-                if(givenAnswers[row][i]==0){
-                    colsNotFilled.push(i);
-                }
-            }
-            while(colsNotFilled[0]!=undefined){
-                index = 0;
-                temp = [];
-                //ensure last possible positions are respected
-                fillRow(row,colsNotFilled);
-                //now pick one with few options left and set a random value
-                if(colsNotFilled[0] != undefined){
-                    let col = leastOptions(row,colsNotFilled);
-                    for(var i = 0;i<=size;i++){
-                        if(possibiies[row][col][i] != 0){
-                            temp.push(possibiies[row][col][i]);
-                        }
-                    }
-                    if(temp[0] != undefined){
-                        number = temp[Math.floor((Math.random() * temp.length))];
-                        givenAnswers[row][col] = number;
-                        colsNotFilled.splice(colsNotFilled.indexOf(col),1);
-                        seed += number.toString(16);
-                    }
-                }
-            }
+            numbers.push(numbers[0]);
+            numbers.splice(0, 1);
         }
         document.getElementById('seed').innerHTML = seed;
-    }
-    function defaultGrid(){
-    var defaultGrid = [];
-        if(size==16){
-            defaultGrid[1]=[1,2,3,4,5,6,7,8,9,0xa,0xb,0xc,0xd,0xe,0xf,0x10];
-            defaultGrid[2]=[2,3,4,5,6,7,8,9,0xa,0xb,0xc,0xd,0xe,0xf,0x10,1];
-            defaultGrid[3]=[3,4,5,6,7,8,9,0xa,0xb,0xc,0xd,0xe,0xf,0x10,1,2];
-            defaultGrid[4]=[4,5,6,7,8,9,0xa,0xb,0xc,0xd,0xe,0xf,0x10,1,2,3];
-            defaultGrid[5]=[5,6,7,8,9,0xa,0xb,0xc,0xd,0xe,0xf,0x10,1,2,3,4];
-            defaultGrid[6]=[6,7,8,9,0xa,0xb,0xc,0xd,0xe,0xf,0x10,1,2,3,4,5];
-            defaultGrid[7]=[7,8,9,0xa,0xb,0xc,0xd,0xe,0xf,0x10,1,2,3,4,5,6];
-            defaultGrid[8]=[8,9,0xa,0xb,0xc,0xd,0xe,0xf,0x10,1,2,3,4,5,6,7];
-            defaultGrid[9]=[9,0xa,0xb,0xc,0xd,0xe,0xf,0x10,1,2,3,4,5,6,7,8];
-            defaultGrid[10]=[0xa,0xb,0xc,0xd,0xe,0xf,0x10,1,2,3,4,5,6,7,8,9];
-            defaultGrid[11]=[0xb,0xc,0xd,0xe,0xf,0x10,1,2,3,4,5,6,7,8,9,0xa];
-            defaultGrid[12]=[0xc,0xd,0xe,0xf,0x10,1,2,3,4,5,6,7,8,9,0xa,0xb];
-            defaultGrid[13]=[0xd,0xe,0xf,0x10,1,2,3,4,5,6,7,8,9,0xa,0xb,0xc];
-            defaultGrid[14]=[0xe,0xf,0x10,1,2,3,4,5,6,7,8,9,0xa,0xb,0xc,0xd];
-            defaultGrid[15]=[0xf,0x10,1,2,3,4,5,6,7,8,9,0xa,0xb,0xc,0xd,0xe];
-            defaultGrid[16]=[0x10,1,2,3,4,5,6,7,8,9,0xa,0xb,0xc,0xd,0xe,0xf];
-        } else if(size==9){
-            defaultGrid[1]=[1,2,3,4,5,6,7,8,9];
-            defaultGrid[2]=[2,3,4,5,6,7,8,9,1];
-            defaultGrid[3]=[3,4,5,6,7,8,9,1,2];
-            defaultGrid[4]=[4,5,6,7,8,9,1,2,3];
-            defaultGrid[5]=[5,6,7,8,9,1,2,3,4];
-            defaultGrid[6]=[6,7,8,9,1,2,3,4,5];
-            defaultGrid[7]=[7,8,9,1,2,3,4,5,6];
-            defaultGrid[8]=[8,9,1,2,3,4,5,6,7];
-            defaultGrid[9]=[9,1,2,3,4,5,6,7,8];
-        } else if(size==4){
-            defaultGrid[1]=[1,2,3,4];
-            defaultGrid[2]=[2,3,4,1];
-            defaultGrid[3]=[3,4,1,2];
-            defaultGrid[4]=[4,1,2,3];
-        }
-        return defaultGrid;
     }
 
     //grid maintenance
@@ -844,6 +767,7 @@ Requires Javascript to run.
     //testing functions
     function test(){
         console.log(givenAnswers);
+        testing = !testing;
         createHoles();
     }
     function getGivenAnswers(){
