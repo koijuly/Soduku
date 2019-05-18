@@ -465,11 +465,14 @@ Requires Javascript to run.
         }
     }
     function createFullGrid(){
+        seed = '';
         //initalise
         initialisePossibilies();
         let numbers = [];
         let order = [];
         let tempNumbers = [];
+        let seedNumbers = '';
+        let seedOrder = '';
 
         //Get the possible numbers
         for(i=0;i<size;i++){
@@ -479,9 +482,12 @@ Requires Javascript to run.
         for(i=0;i<size;i++){
             let temp = Math.floor((Math.random() * tempNumbers.length));
             numbers[i] = tempNumbers[temp];
+            seedNumbers += numbers[i].toString(17);
             order[i] = tempNumbers[temp];
+            seedNumbers += order[i].toString(17);
             tempNumbers.splice(temp, 1);
         }
+        seed = seedNumbers + 'h' + seedOrder + 'h';
         for(i = 0; i < size; i++){
             for(var j = 0; j < size; j++){
                 givenAnswers[order[i]][order[j]] = numbers[j];
