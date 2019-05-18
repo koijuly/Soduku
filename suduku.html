@@ -482,9 +482,9 @@ Requires Javascript to run.
             order[i] = tempNumbers[temp];
             tempNumbers.splice(temp, 1);
         }
-        for(i = 1; i <= size; i++){
+        for(i = 0; i < size; i++){
             for(var j = 0; j < size; j++){
-                givenAnswers[order[i-1]][j+1] = numbers[j];
+                givenAnswers[order[i]][j+1] = numbers[j];
             }
             numbers.push(numbers[0]);
             numbers.splice(0, 1);
