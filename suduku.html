@@ -197,7 +197,7 @@ Requires Javascript to run.
 <div id="buttons">
     <div class="button" id="reset" onclick="resetGrid()">Reset Grid</div>
     <div class="button" id="pencil" onclick="fillPencil()">Update Pencil Marks</div>
-    <div class="button" id="finalise" onclick="makePenFromPencil()">Mark Final</div>
+    <div class="button" id="finalise" onclick="makePenFromPencil('user')">Mark Final</div>
     <div class="button" id="empty" onclick="generateEmptyGrid()">Empty Grid</div>
     <div class="button" id="import" onclick="importGrid()">Import Grid</div>
     <p class="label" id="new" onclick="createNewGrid(0)">New Grid:
@@ -212,14 +212,19 @@ Requires Javascript to run.
         <div class="button" onclick="gridSize(16)">Large</div>
     </p>
 </div>
-<p><textarea id="seed" type="text" value=""></textarea></p>
+<textarea id="seed" type="text" value=""></textarea>
 <script>
     var beginingNumbers = [];
     var possibiies = [];
     var givenAnswers = [];
     var size = 4;
     var seed = '';
+    var addToSeed = true;
     var testing = false;
+    var rowStart = 0;
+    var rowEnd = 0;
+    var colStart = 0;
+    var colEnd = 0;
     //on cell click events
     function penPressed(){
         row = parseInt(this.id.substring(9, 10),17);
@@ -263,7 +268,7 @@ Requires Javascript to run.
         var currentcell = document.getElementById(current);
         var splitCell = "";
         findPossibilities(row,col);
-        for( var i = 1; i <=size ; i++){
+        for( var i = 1; i  <= size ; i++){
             if(possibiies[row][col][i] != i){
                 splitCell += '<div id = "' + current + "_" + i + '" class="nonAnswer innerCell ' + current + ' ">' + i + '</div>';
             } else {
@@ -315,13 +320,15 @@ Requires Javascript to run.
         let conflict = '';
         let errors = false;
         for(row = 1; row <= size; row++){
-            for(col = 1; col <=size; col++){
+            for(col = 1; col  <= size; col++){
                 identity = 'answer' + 'row' + row.toString(17) + '_col' + col.toString(17);
                 conflict = document.getElementById(identity);
                 if(conflict && conflict.classList.contains('wrong') == false){
+                    //this was one of the original numbers
                     beginingNumbers[row][col-1] = givenAnswers[row][col];
                 } else {
                     if(conflict && conflict.classList.contains('wrong') == true){
+                        //this was a user inputted number
                         errors = true;
                     }
                 }
@@ -398,7 +405,7 @@ Requires Javascript to run.
     }
     function generateEmptyGrid(){
         initialisePossibilies();
-        for(var i = 1; i<=size;i++){
+        for(var i = 1; i <= size;i++){
             for(var j = 0; j <size; j++){
                 beginingNumbers[i][j] = 0;
             }
@@ -430,65 +437,106 @@ Requires Javascript to run.
         if(isNaN(parseInt(test[0],17))){
             alert('Can\'t build without a seed');
         } else {
+            alert('this is sometimes slow.. needs updated')
             size = parseInt(test[0],17);
             generateEmptyGrid();
-            for(var i = 0; i < size; i++){
-                givenAnswers[1][i+1] = test[1].substring(i,i+1);
+            for(var i = 0; i < size * size; i++){
+                var row = parseInt(test[0].substring(i,0),17);
+                i++;
+                var col = parseInt(test[0].substring(i,0),17);
+                i++;
+                var number = parseInt(test[0].substring(i,0),17);
+                givenAnswers[row][col] = number;
+                console.log(row + ':' + col + ':' + number);
             }
-            for (var row = 2; row < size; row++){
-                var line = test[row];
-                var colsNotFilled = [];
-                var lineIndex = 0;
-                for(var i = 1; i <=size; i++){
-                    if(givenAnswers[row][i]==0){
-                        colsNotFilled.push(i);
-                    }
-                }
-                while(colsNotFilled[0]!=undefined){
-                    var index = 0;
-                    var temp = [];
-                    //ensure last possible positions are respected
-                    fillRow(row,colsNotFilled);
-                    //now pick one with few options left and set a random value
-                    if(colsNotFilled[0] != undefined){
-                        col = leastOptions(row);
-                        number = line.substring(lineIndex,lineIndex +1);
-                        lineIndex++;
-                        givenAnswers[row][col] = number;
-                        colsNotFilled.splice(colsNotFilled.indexOf(col),1);
-                    }
-                }
-            }
-            createHoles(test[size]);
+            createHoles(test[1]);
             //render grid
             makePenFromPencil();
         }
     }
     function createFullGrid(){
+        addToSeed = true;
+        var tries = 0;
+        var maxTries = 2;
+        var tryAgain = false;
+        do{
+            try{
+                atemptCreateFullGrid();
+                tryAgain = false;
+            }
+            catch(err){
+                console.log(err);
+                tries ++;
+                if (tries < maxTries){
+                    tryAgain = true;
+                }
+            }
+        }
+        while (tryAgain);
+        if(maxTries == tries){
+            alert('did not randomise a base grid, feel free to try again');
+        }
+    }
+    function atemptCreateFullGrid(){
         //initalise
+        seed = '';
         initialisePossibilies();
         let numbers = [];
         let order = [];
         let tempNumbers = [];
-
-        //Get the possible numbers
-        for(i=0;i<size;i++){
-            tempNumbers[i] = i + 1;
-        }
-        //Randomise the order
-        for(i=0;i<size;i++){
-            let temp = Math.floor((Math.random() * tempNumbers.length));
-            numbers[i] = tempNumbers[temp];
-            order[i] = tempNumbers[temp];
-            tempNumbers.splice(temp, 1);
-        }
-        for(i = 0; i < size; i++){
-            for(var j = 0; j < size; j++){
-                givenAnswers[order[i]][order[j]] = numbers[j];
+        /*
+        * Argh, nothing respects the other two zones reliably
+        * when you hit the last row of squares need to change it so that you're not taking the last options from a cell
+        */
+        var squaresPerRowOrCol = Math.sqrt(size); // This assumes square squares
+        //for rectanguar subdivisions will have to floor/ceil
+        var fillCell = [0,0]; //this is which gridspace we're looking at
+        var cell = 0; // for seed
+        for( var square = 1; square <= (size - squaresPerRowOrCol); square ++){
+            //find the bounding box of this square
+            rowEnd = Math.ceil(square / squaresPerRowOrCol) * squaresPerRowOrCol;
+            rowStart = rowEnd - squaresPerRowOrCol + 1;
+            var squareCol = (square + squaresPerRowOrCol - 1) % squaresPerRowOrCol + 1;
+            colEnd = squareCol * squaresPerRowOrCol;
+            colStart = colEnd - squaresPerRowOrCol + 1;
+            for ( var i = 0; i < size; i++){
+                fillCell = leastOptions();
+                var row = fillCell[0];
+                var col = fillCell[1];
+                var cellPossibilities = fillCell[2];
+                if(cellPossibilities.length == 1){
+                    givenAnswers[row][col] = cellPossibilities[0];
+                    cell = cellPossibilities[0];
+                } else {
+                    var tempNumber = Math.floor((Math.random() * cellPossibilities.length));
+                    givenAnswers[row][col] = cellPossibilities[tempNumber];
+                    cell = cellPossibilities[tempNumber];
+                }
+                seed += row.toString(17) + col.toString(17) + cell.toString(17);
             }
-            numbers.push(numbers[0]);
-            numbers.splice(0, 1);
         }
+        //really need to improve this...
+        //Treat the last row of squares as one large box
+        colStart = 1;
+        colEnd = size;
+        rowEnd = Math.ceil(square / squaresPerRowOrCol) * squaresPerRowOrCol;
+        rowStart = rowEnd - squaresPerRowOrCol + 1;
+        for (var i = 0; i < colEnd * squaresPerRowOrCol; i++){
+            fillCell = leastOptions();
+            var row = fillCell[0];
+            var col = fillCell[1];
+            var cellPossibilities = fillCell[2];
+            if(cellPossibilities.length == 1){
+                givenAnswers[row][col] = cellPossibilities[0];
+                cell = cellPossibilities[0];
+            } else {
+                var tempNumber = Math.floor((Math.random() * cellPossibilities.length));
+                givenAnswers[row][col] = cellPossibilities[tempNumber];
+                cell = cellPossibilities[tempNumber];
+            }
+            seed += row.toString(17) + col.toString(17) + cell.toString(17);
+        }
+        seed += 'h';
         document.getElementById('seed').innerHTML = seed;
     }
 
@@ -552,8 +600,10 @@ Requires Javascript to run.
                 givenAnswers[row][col] = 0;
             }
         } else {
-            seed = document.getElementById('seed').innerHTML;
-            for(row = 1; row <=size;row++){
+            if(addToSeed){
+                seed = document.getElementById('seed').innerHTML;
+            }
+            for(row = 1; row  <= size;row++){
                 for(times = 0; times <= (size/2); times++){
                     col = Math.ceil((Math.random() * size));
                     temp = givenAnswers[row][col];
@@ -561,29 +611,36 @@ Requires Javascript to run.
                     if(numberPosibities(row,col) != 1){
                         givenAnswers[row][col] = temp;
                     } else if(temp != 0) {
-                        seed += row.toString(17) + col.toString(17);
+                        if(addToSeed){
+                            seed += row.toString(17) + col.toString(17);
+                        }
                     }
                 }
             }
         }
-        document.getElementById('seed').innerHTML = seed;
+        if(addToSeed){
+            document.getElementById('seed').innerHTML = seed;
+        }
     }
-    function makePenFromPencil(){
+    function makePenFromPencil(who = 'me'){
         //prepare for render
         for(row = 1; row <= size; row++){
-            for(col = 1; col <=size; col++){
+            for(col = 1; col  <= size; col++){
                 beginingNumbers[row][col-1] = givenAnswers[row][col];
             }
         }
         //finally render the answer
         resetGrid();
+        if(who =='user'){
+            addToSeed = false;
+        }
     }
 
     //validation checks
     function findPossibilities (row, col){
         let test = 0;
         let temp = [];
-        for(let i = 1;i<=size;i++){
+        for(let i = 1;i <= size;i++){
             temp[i] = i;
         }
         for(let i =  1; i <= size ; i++){
@@ -629,7 +686,7 @@ Requires Javascript to run.
                 //mark things wrong.
                 markWrong(row,col);
                 //row and column checks
-                for(let check = 1;check<=size;check++){
+                for(let check = 1;check <= size;check++){
                     if(givenAnswers[row][check]==number){
                          markWrong(row,check);
                     }
@@ -651,7 +708,7 @@ Requires Javascript to run.
         else {
             //Need to remove unneeded 'wrong' tags
             unmarkWrong(row,col);
-            for(let check = 1;check<=size;check++){
+            for(let check = 1;check <= size;check++){
                 if(checkValid(row,check)){
                      unmarkWrong(row,check);
                 }
@@ -670,7 +727,7 @@ Requires Javascript to run.
         }
     }
 
-    //Solvers -- used to create/import grids
+    //Solvers -- used to create grids
     function fillColmuns (row, colsToFill){
         var foundOne = false;
         for(var number = 1; number <= size; number++){
@@ -702,7 +759,7 @@ Requires Javascript to run.
                     findPossibilities(blockRow,blockCol);
                     count = 0;
                     var temp = 0;
-                    for(var number = 1;number<=size;number++){
+                    for(var number = 1;number <= size;number++){
                         if(possibiies[blockRow][blockCol][number]==number){
                             temp = number;
                             count++;
@@ -732,29 +789,35 @@ Requires Javascript to run.
     function numberPosibities(row,col){
         findPossibilities(row,col);
         let count = 0;
-        for(var i = 1;i<=size;i++){
+        for(var i = 1;i <= size;i++){
             if(possibiies[row][col][i] != 0){
                 count++;
             }
         }
         return count;
     }
-    function leastOptions(row){
+    // in the square currently looking at; This is only used in random grids
+    function leastOptions(){
         var temp = [];
-        var index = 0;
-        var number = size;
-        for ( var col = 1; col <= size; col++){
-            findPossibilities(row,col);
-            temp[col] = [];
-            if(givenAnswers[row][col] == 0){
-                for(var i = 0;i<=size;i++){
-                    if(possibiies[row][col][i] != 0){
-                        temp[col].push(possibiies[row][col][i]);
+        var index = [0,0];
+        var number = size + 1;
+        for ( var row = rowStart; row <= rowEnd; row ++){
+            for ( var col = colStart; col <= colEnd; col ++){
+                if(givenAnswers[row][col] == 0){
+                    findPossibilities(row, col);
+                    temp = [];
+                    for(var i = 0; i <= size; i++){
+                        if(possibiies[row][col][i] != 0){
+                            temp.push(possibiies[row][col][i]);
+                        }
                     }
-                }
-                if(temp[col].length < number){
-                    index = col;
-                    number = temp[col].length;
+                    if(temp.length == 1) {
+                        //it's only got one option: There can be no fewer, so return it.
+                        return [row, col, [temp]];
+                    } else if(temp.length < number){
+                        index = [row, col, temp];
+                        number = temp.length;
+                    }
                 }
             }
         }
