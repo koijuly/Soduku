@@ -197,7 +197,7 @@ Requires Javascript to run.
 <div id="buttons">
     <div class="button" id="reset" onclick="resetGrid()">Reset Grid</div>
     <div class="button" id="pencil" onclick="fillPencil()">Update Pencil Marks</div>
-    <div class="button" id="finalise" onclick="makePenFromPencil()">Mark Final</div>
+    <div class="button" id="finalise" onclick="makePenFromPencil('user')">Mark Final</div>
     <div class="button" id="empty" onclick="generateEmptyGrid()">Empty Grid</div>
     <div class="button" id="import" onclick="importGrid()">Import Grid</div>
     <p class="label" id="new" onclick="createNewGrid(0)">New Grid:
@@ -212,13 +212,14 @@ Requires Javascript to run.
         <div class="button" onclick="gridSize(16)">Large</div>
     </p>
 </div>
-<p><textarea id="seed" type="text" value=""></textarea></p>
+<textarea id="seed" type="text" value=""></textarea>
 <script>
     var beginingNumbers = [];
     var possibiies = [];
     var givenAnswers = [];
     var size = 4;
     var seed = '';
+    var addToSeed = true;
     var testing = false;
     var rowStart = 0;
     var rowEnd = 0;
@@ -323,9 +324,11 @@ Requires Javascript to run.
                 identity = 'answer' + 'row' + row.toString(17) + '_col' + col.toString(17);
                 conflict = document.getElementById(identity);
                 if(conflict && conflict.classList.contains('wrong') == false){
+                    //this was one of the original numbers
                     beginingNumbers[row][col-1] = givenAnswers[row][col];
                 } else {
                     if(conflict && conflict.classList.contains('wrong') == true){
+                        //this was a user inputted number
                         errors = true;
                     }
                 }
@@ -443,6 +446,29 @@ Requires Javascript to run.
         }
     }
     function createFullGrid(){
+        addToSeed = true;
+        var tries = 0;
+        var maxTries = 2;
+        var tryAgain = false;
+        do{
+            try{
+                atemptCreateFullGrid();
+                tryAgain = false;
+            }
+            catch(err){
+                console.log(err);
+                tries ++;
+                if (tries < maxTries){
+                    tryAgain = true;
+                }
+            }
+        }
+        while (tryAgain);
+        if(maxTries == tries){
+            alert('did not randomise a base grid, feel free to try again');
+        }
+    }
+    function atemptCreateFullGrid(){
         //initalise
         seed = '';
         initialisePossibilies();
@@ -453,8 +479,10 @@ Requires Javascript to run.
         * Argh, nothing respects the other two zones reliably
         * when you hit the last row of squares need to change it so that you're not taking the last options from a cell
         */
-        var squaresPerRowOrCol = Math.sqrt(size); // This assumes square grids, for rectanguar will have to floor/ceil
+        var squaresPerRowOrCol = Math.sqrt(size); // This assumes square squares
+        //for rectanguar subdivisions will have to floor/ceil
         var fillCell = [0,0]; //this is which gridspace we're looking at
+        var cell = 0; // for seed
         for( var square = 1; square <= (size - squaresPerRowOrCol); square ++){
             //find the bounding box of this square
             rowEnd = Math.ceil(square / squaresPerRowOrCol) * squaresPerRowOrCol;
@@ -469,10 +497,13 @@ Requires Javascript to run.
                 var cellPossibilities = fillCell[2];
                 if(cellPossibilities.length == 1){
                     givenAnswers[row][col] = cellPossibilities[0];
+                    cell = cellPossibilities[0];
                 } else {
                     var tempNumber = Math.floor((Math.random() * cellPossibilities.length));
                     givenAnswers[row][col] = cellPossibilities[tempNumber];
+                    cell = cellPossibilities[tempNumber];
                 }
+                seed += row.toString(17) + col.toString(17) + cell.toString(17);
             }
         }
         //really need to improve this...
@@ -486,12 +517,18 @@ Requires Javascript to run.
             var row = fillCell[0];
             var col = fillCell[1];
             var cellPossibilities = fillCell[2];
+            if(cellPossibilities.length == 1){
                 givenAnswers[row][col] = cellPossibilities[0];
+                cell = cellPossibilities[0];
             } else {
                 var tempNumber = Math.floor((Math.random() * cellPossibilities.length));
                 givenAnswers[row][col] = cellPossibilities[tempNumber];
+                cell = cellPossibilities[tempNumber];
             }
+            seed += row.toString(17) + col.toString(17) + cell.toString(17);
         }
+        seed += 'h';
+        document.getElementById('seed').innerHTML = seed;
     }
 
     //grid maintenance
@@ -554,7 +591,9 @@ Requires Javascript to run.
                 givenAnswers[row][col] = 0;
             }
         } else {
-            seed = document.getElementById('seed').innerHTML;
+            if(addToSeed){
+                seed = document.getElementById('seed').innerHTML;
+            }
             for(row = 1; row  <= size;row++){
                 for(times = 0; times <= (size/2); times++){
                     col = Math.ceil((Math.random() * size));
@@ -563,14 +602,18 @@ Requires Javascript to run.
                     if(numberPosibities(row,col) != 1){
                         givenAnswers[row][col] = temp;
                     } else if(temp != 0) {
-                        seed += row.toString(17) + col.toString(17);
+                        if(addToSeed){
+                            seed += row.toString(17) + col.toString(17);
+                        }
                     }
                 }
             }
         }
-        document.getElementById('seed').innerHTML = seed;
+        if(addToSeed){
+            document.getElementById('seed').innerHTML = seed;
+        }
     }
-    function makePenFromPencil(){
+    function makePenFromPencil(who = 'me'){
         //prepare for render
         for(row = 1; row <= size; row++){
             for(col = 1; col  <= size; col++){
@@ -579,6 +622,9 @@ Requires Javascript to run.
         }
         //finally render the answer
         resetGrid();
+        if(who =='user'){
+            addToSeed = false;
+        }
     }
 
     //validation checks
@@ -672,7 +718,7 @@ Requires Javascript to run.
         }
     }
 
-    //Solvers -- used to create/import grids
+    //Solvers -- used to create grids
     function fillColmuns (row, colsToFill){
         var foundOne = false;
         for(var number = 1; number <= size; number++){
