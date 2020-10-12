@@ -12,7 +12,7 @@ Below is a basic overview of the buttons as they stand. Eventually, I hope to im
 - Update Pencil Marks: allows you to get the program to go through the grid and remove any impossible answers based on your current answers
 - Mark Final: turns your given answers into black unchangeable answers so long as they are not clashing with other squares
 - Empty Grid: Gives you an empty grid - can be used if you want to play a puzzle from another source
-- Import grid: Given a seed is in the text box below generates that grid.
+- Import grid: From a seed is in the text box below generates that grid.
 
 New Grid creates a grid and then runs several 'make holes' based on the number you pick and the comparative size of the game grid (1 in small is 1, 1 in Normal is 2, 1 in large is 3).
 
