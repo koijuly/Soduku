@@ -169,35 +169,34 @@
         var fillCell = [0,0]; //this is which gridspace we're looking at
         var cell = 0; // for seed
         for( var square = 1; square <= (size - squaresPerRowOrCol); square ++){
-            //find the bounding box of this square
-            rowEnd = Math.ceil(square / squaresPerRowOrCol) * squaresPerRowOrCol;
-            rowStart = rowEnd - squaresPerRowOrCol + 1;
-            var squareCol = (square + squaresPerRowOrCol - 1) % squaresPerRowOrCol + 1;
-            colEnd = squareCol * squaresPerRowOrCol;
-            colStart = colEnd - squaresPerRowOrCol + 1;
-            for ( var i = 0; i < size; i++){
-                fillCell = leastOptions();
-                var row = fillCell[0];
-                var col = fillCell[1];
-                var cellPossibilities = fillCell[2];
-                if(cellPossibilities.length == 1){
-                    givenAnswers[row][col] = cellPossibilities[0];
-                    cell = cellPossibilities[0];
-                } else {
-                    var tempNumber = Math.floor((Math.random() * cellPossibilities.length));
-                    givenAnswers[row][col] = cellPossibilities[tempNumber];
-                    cell = cellPossibilities[tempNumber];
-                }
-                seed += row.toString(17) + col.toString(17) + cell.toString(17);
-            }
+            defineSquare(square);//for least posibilites
+            fillCells(size);
         }
         //really need to improve this...
-        //Treat the last row of squares as one large box
+        //Treat the last row of squares as one large box for least posibilites
         colStart = 1;
         colEnd = size;
-        rowEnd = Math.ceil(square / squaresPerRowOrCol) * squaresPerRowOrCol;
-        rowStart = rowEnd - squaresPerRowOrCol + 1;
-        for (var i = 0; i < colEnd * squaresPerRowOrCol; i++){
+        rowEnd = size;
+        rowStart = size - squaresPerRowOrCol + 1;
+        fillCells(colEnd * squaresPerRowOrCol);
+        seed += 'h';
+        document.getElementById('seed').innerHTML = seed;
+    }
+
+    //Helper functions
+    function defineSquare(square){
+        var cellsPerRowOrCol = Math.sqrt(size);
+        //find the bounding box of this square
+        rowEnd = Math.ceil(square / cellsPerRowOrCol) * cellsPerRowOrCol;
+        rowStart = rowEnd - cellsPerRowOrCol + 1;
+        
+        //this is wrong...
+        var squareCol = (square + cellsPerRowOrCol - 1) % cellsPerRowOrCol + 1;
+        colEnd = squareCol * cellsPerRowOrCol;
+        colStart = colEnd - cellsPerRowOrCol + 1;
+    }
+    function fillCells(totalCells){
+        for ( var i = 0; i < totalCells; i++){
             fillCell = leastOptions();
             var row = fillCell[0];
             var col = fillCell[1];
@@ -212,8 +211,6 @@
             }
             seed += row.toString(17) + col.toString(17) + cell.toString(17);
         }
-        seed += 'h';
-        document.getElementById('seed').innerHTML = seed;
     }
 
     //grid maintenance
