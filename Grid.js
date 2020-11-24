@@ -301,15 +301,30 @@
         }
     }
     function makePenFromPencil(who = 'me'){
-        //prepare for render
-        for(row = 1; row <= size; row++){
-            for(col = 1; col  <= size; col++){
-                beginingNumbers[row][col-1] = givenAnswers[row][col];
+        if(who == 'me'){
+            //prepare for render
+            for(row = 1; row <= size; row++){
+                for(col = 1; col  <= size; col++){
+                    beginingNumbers[row][col-1] = givenAnswers[row][col];
+                }
             }
+        }
+        if(who =='user'){
+            for(row = 1; row <= size; row++){
+                for(col = 1; col  <= size; col++){
+                    if(beginingNumbers[row][col-1] == 0){
+                        var CellIdentity = 'row' + row.toString(17) + '_col' + col.toString(17);
+                        cell = document.getElementById('answer' + CellIdentity);
+                        if(cell != null){
+                            if(cell.classList.contains('wrong') == false){
+                                beginingNumbers[row][col-1] = givenAnswers[row][col];
+                            }
+                        }
+                    }
+                }
+            }
+            addToSeed = false;
         }
         //finally render the answer
         resetGrid();
-        if(who =='user'){
-            addToSeed = false;
-        }
     }
