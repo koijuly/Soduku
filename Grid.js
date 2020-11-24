@@ -155,7 +155,7 @@
     }
     function atemptCreateFullGrid(){
         //initalise
-        seed = '';
+        seed = size.toString(17);
         initialisePossibilies();
         let numbers = [];
         let order = [];
