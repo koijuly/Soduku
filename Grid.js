@@ -122,10 +122,15 @@
         if(isNaN(parseInt(test[0],17))){
             alert('Can\'t build without a seed');
         } else {
-            size = parseInt(test[0],17);
+            size = test[0].charAt(0)
             generateEmptyGrid();
-            alert('This needs to be rebuilt to mirror the re-vamped generate');
-            createHoles(test[size]);
+            for(var position = 1; position < test[0].length; position +=3){
+                row = test[0].charAt(position);
+                col = test[0].charAt(position + 1);
+                value = test[0].charAt(position + 2);
+                givenAnswers[row][col] = value;
+            }
+            createHoles(test[1]);
             //render grid
             makePenFromPencil();
         }
