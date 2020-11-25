@@ -89,6 +89,24 @@
             }
         }
     }
+    function KnocksOutRowCol(){
+        var wipesOutRowOrCol = false;
+        for(var i = 1; i <= size; i++){
+            if(beginingNumbers[row][i-1] == 0){
+                if(numberPosibities(row,i) == 1 && givenAnswers[row][i] == givenAnswers[row][col]){
+                    wipesOutRowOrCol = true;
+                    break;
+                }
+            }
+            if(beginingNumbers[i][col-1] == 0 && givenAnswers[i][col] == givenAnswers[row][col]){
+                if(numberPosibities(i,col) == 1){
+                    var wipesOutRowOrCol = true;
+                    break;
+                }
+            }
+        }
+        return wipesOutRowOrCol;
+    }
 
     //Solvers -- used to create grids
     function fillColmuns (row, colsToFill){
