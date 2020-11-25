@@ -89,7 +89,7 @@
             }
         }
     }
-    function KnocksOutRowCol(){
+    function KnocksOutRowCol(row, col){
         var wipesOutRowOrCol = false;
         for(var i = 1; i <= size; i++){
             if(beginingNumbers[row][i-1] == 0){

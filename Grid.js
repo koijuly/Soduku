@@ -318,8 +318,10 @@
                         if(cell != null){
                             if(cell.classList.contains('wrong') == false){
                                 //Check for wiping out options for another cell in row/col
-                                if(KnocksOutRowCol() == false){
+                                if(KnocksOutRowCol(row, col) == false){
                                     beginingNumbers[row][col-1] = givenAnswers[row][col];
+                                } else {
+                                    givenAnswers[row][col] = 0;
                                 }
                             }
                         }
