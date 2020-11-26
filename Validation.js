@@ -89,6 +89,46 @@
             }
         }
     }
+    function KnocksOutRowCol(row, col){
+        let answer = givenAnswers[row][col];
+        let rowFound = [];
+        let colFound = [];
+        for(var i = 1; i <= size; i++){
+            if(col != i){
+                if(beginingNumbers[row][i-1] == 0 && givenAnswers[row][i] == 0){
+                    let cellPossibilities = numberPosibities(row, i);
+                    if(cellPossibilities == 0){
+                        return true;
+                    }
+                    if(cellPossibilities == 1){
+                        let found = possibiies[row][i].find(function(cellValue){return cellValue})
+                        if(found in rowFound){
+                            return true;
+                        } else {
+                            rowFound[found] = true;
+                        }
+                    }
+                }
+            }
+            if(row != i){
+                if(beginingNumbers[i][col-1] == 0 && givenAnswers[i][col] == 0){
+                    let cellPossibilities = numberPosibities(i, col);
+                    if(cellPossibilities == 0){
+                        return true;
+                    }
+                    if(cellPossibilities == 1){
+                        let found = possibiies[i][col].find(function(cellValue){return cellValue})
+                        if(found in colFound){
+                            return true;
+                        } else {
+                            colFound[found] = true;
+                        }
+                    }
+                }
+            }
+        }
+        return false; //it gets here if no issues are found
+    }
 
     //Solvers -- used to create grids
     function fillColmuns (row, colsToFill){
